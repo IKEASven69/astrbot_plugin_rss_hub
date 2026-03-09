@@ -1,5 +1,5 @@
 """
-RSS Hub - 多源资讯订阅插件（v2.2.0）
+RSS Hub - 多源资讯订阅插件（v2.2.1）
 支持多RSS源订阅、AI智能总结、定时推送
 
 核心功能：
@@ -7,7 +7,7 @@ RSS Hub - 多源资讯订阅插件（v2.2.0）
 ✅ 并发获取 - 同时获取多个源，速度提升 3x
 ✅ 批量操作 - 支持 pause all, resume all
 ✅ 交互式向导 - 引导式添加源
-✅ 命令前缀 - 所有命令使用 rss 前缀，避免冲突
+✅ 官方命令组 - 使用 @filter.command_group 标准实现
 """
 
 import asyncio
@@ -218,36 +218,20 @@ class RSSHubPlugin(Star):
                     pass
         logger.info("RSS Hub 插件已停用")
 
-    # ==================== 命令处理 ====================
+    # ==================== 命令组 ====================
 
-    def _parse_command_args(self, message_str: str, command: str) -> str:
-        """解析命令参数，自动处理带/和不带/的格式"""
-        text = message_str.strip()
+    @filter.command_group("rss")
+    def rss(self):
+        """RSS Hub - 多源资讯订阅"""
+        pass
 
-        # 去掉可能的前导斜杠
-        if text.startswith("/"):
-            text = text[1:].strip()
+    # ── help ──
 
-        # 尝试新格式 "rss <command>"
-        new_prefix = f"rss {command} "
-        if text.startswith(new_prefix):
-            return text[len(new_prefix):].strip()
-        if text == f"rss {command}":
-            return ""
-        # 兼容旧格式（直接命令）
-        if text.startswith(f"{command} "):
-            return text[len(command)+1:].strip()
-        if text == command:
-            return ""
-        # 回退：去掉前几个字符（向后兼容）
-        return text[len(command):].strip()
-
-    @filter.command("rss")
-    @filter.command("rss help")
+    @rss.command("help", alias={""})
     async def cmd_help(self, event: AstrMessageEvent):
         """显示帮助"""
         help_text = """
-📰 **RSS Hub v2.1 - 多源资讯订阅**
+📰 **RSS Hub v2.2.1 - 多源资讯订阅（使用官方命令组）**
 
 **基础命令：**
 rss            - 显示帮助
@@ -276,7 +260,7 @@ rss pause all     # 暂停所有源
         """
         yield event.plain_result(help_text.strip())
 
-    @filter.command("rss list")
+    @rss.command("list")
     async def cmd_list(self, event: AstrMessageEvent):
         """列出所有 RSS 源"""
         if not self._rss_sources:
@@ -296,7 +280,7 @@ rss pause all     # 暂停所有源
         lines.append("💡 使用 /get <别名> 获取资讯")
         yield event.plain_result("\n".join(lines))
 
-    @filter.command("rss recs")
+    @rss.command("recs")
     async def cmd_recs(self, event: AstrMessageEvent):
         """显示推荐源列表"""
         lines = ["🌟 **推荐 RSS 源**\n"]
@@ -314,7 +298,7 @@ rss pause all     # 暂停所有源
         lines.append("💡 或直接：/add 36kr https://36kr.com/feed")
         yield event.plain_result("\n".join(lines))
 
-    @filter.command("rss add")
+    @rss.command("add")
     async def cmd_add(self, event: AstrMessageEvent):
         """添加 RSS 源（支持交互式向导）"""
         text = self._parse_command_args(event.message_str, "add")
@@ -456,7 +440,7 @@ rss pause all     # 暂停所有源
             f"💡 使用 /get {alias} 获取资讯"
         )
 
-    @filter.command("rss del")
+    @rss.command("del")
     async def cmd_del(self, event: AstrMessageEvent):
         """删除 RSS 源（支持批量）"""
         args = self._parse_command_args(event.message_str, "del")
@@ -492,7 +476,7 @@ rss pause all     # 暂停所有源
 
         yield event.plain_result(f"✅ 已删除 `{source.alias}`")
 
-    @filter.command("rss rename")
+    @rss.command("rename")
     async def cmd_rename(self, event: AstrMessageEvent):
         """重命名源别名"""
         args = self._parse_command_args(event.message_str, "rename")
@@ -530,7 +514,7 @@ rss pause all     # 暂停所有源
 
         yield event.plain_result(f"✅ 已重命名：`{old_alias_name}` → `{new_alias}`")
 
-    @filter.command("rss pause")
+    @rss.command("pause")
     async def cmd_pause(self, event: AstrMessageEvent):
         """暂停源（支持批量）"""
         args = self._parse_command_args(event.message_str, "pause")
@@ -568,7 +552,7 @@ rss pause all     # 暂停所有源
 
         yield event.plain_result(f"⏸️ 已暂停 `{source.alias}`")
 
-    @filter.command("rss resume")
+    @rss.command("resume")
     async def cmd_resume(self, event: AstrMessageEvent):
         """恢复源（支持批量）"""
         args = self._parse_command_args(event.message_str, "resume")
@@ -602,7 +586,7 @@ rss pause all     # 暂停所有源
 
         yield event.plain_result(f"▶️ 已恢复 `{source.alias}`")
 
-    @filter.command("rss test")
+    @rss.command("test")
     async def cmd_test(self, event: AstrMessageEvent):
         """测试源"""
         args = self._parse_command_args(event.message_str, "test")
@@ -627,7 +611,7 @@ rss pause all     # 暂停所有源
         else:
             yield event.plain_result(f"❌ `{source.alias}` 测试失败")
 
-    @filter.command("rss get")
+    @rss.command("get")
     async def cmd_get(self, event: AstrMessageEvent):
         """获取最新资讯（支持并发）"""
         args = self._parse_command_args(event.message_str, "get")
@@ -689,7 +673,7 @@ rss pause all     # 暂停所有源
 
             yield event.plain_result(text)
 
-    @filter.command("rss sub")
+    @rss.command("sub")
     async def cmd_sub(self, event: AstrMessageEvent):
         """订阅"""
         umo = event.unified_msg_origin
@@ -701,7 +685,7 @@ rss pause all     # 暂停所有源
         await self._save_subscriptions()
         yield event.plain_result("✅ 订阅成功！取消：rss unsub")
 
-    @filter.command("rss unsub")
+    @rss.command("unsub")
     async def cmd_unsub(self, event: AstrMessageEvent):
         """取消订阅"""
         umo = event.unified_msg_origin
@@ -713,7 +697,7 @@ rss pause all     # 暂停所有源
         await self._save_subscriptions()
         yield event.plain_result("✅ 已取消订阅")
 
-    @filter.command("rss status")
+    @rss.command("status")
     async def cmd_status(self, event: AstrMessageEvent):
         """查看状态"""
         active_count = sum(1 for s in self._rss_sources.values() if s.enabled)
