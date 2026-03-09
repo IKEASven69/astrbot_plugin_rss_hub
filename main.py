@@ -220,6 +220,35 @@ class RSSHubPlugin(Star):
 
     # ==================== 命令组 ====================
 
+    def _get_command_args(self, message_str: str, command: str) -> str:
+        """获取命令参数（处理命令前缀）
+
+        Args:
+            message_str: 完整消息字符串，可能包含 "rss <command> <args>"
+            command: 命令名称，如 "add", "del" 等
+
+        Returns:
+            纯参数部分
+        """
+        text = message_str.strip()
+
+        # 尝试去掉 "rss <command> " 前缀
+        prefix1 = f"rss {command} "
+        if text.startswith(prefix1):
+            return text[len(prefix1):].strip()
+
+        # 尝试去掉 "<command> " 前缀
+        prefix2 = f"{command} "
+        if text.startswith(prefix2):
+            return text[len(prefix2):].strip()
+
+        # 如果等于完整命令，返回空
+        if text == f"rss {command}" or text == command:
+            return ""
+
+        # 其他情况，直接返回（可能已经是纯参数）
+        return text
+
     @filter.command_group("rss")
     def rss(self):
         """RSS Hub - 多源资讯订阅"""
@@ -301,18 +330,7 @@ rss pause all     # 暂停所有源
     @rss.command("add")
     async def cmd_add(self, event: AstrMessageEvent):
         """添加 RSS 源（支持交互式向导）"""
-        # 获取完整消息并处理
-        full_text = event.message_str.strip()
-        logger.info(f"[DEBUG] 完整消息: '{full_text}'")
-
-        # 使用命令组后，message_str 可能仍然包含 "add"，需要去掉
-        text = full_text
-        # 如果消息以 "add " 开头，去掉它（兼容性处理）
-        if text.startswith("add "):
-            text = text[4:].strip()
-        elif text == "add":
-            text = ""
-
+        text = self._get_command_args(event.message_str, "add")
         logger.info(f"[DEBUG] 处理后参数: '{text}'")
 
         # 方式1：从推荐源添加
@@ -445,7 +463,7 @@ rss pause all     # 暂停所有源
     @rss.command("del")
     async def cmd_del(self, event: AstrMessageEvent):
         """删除 RSS 源（支持批量）"""
-        args = event.message_str.strip()
+        args = self._get_command_args(event.message_str, "del")
         if not args:
             yield event.plain_result("💡 格式：/del <别名> 或 /del all")
             return
@@ -481,7 +499,7 @@ rss pause all     # 暂停所有源
     @rss.command("rename")
     async def cmd_rename(self, event: AstrMessageEvent):
         """重命名源别名"""
-        args = event.message_str.strip()
+        args = self._get_command_args(event.message_str, "rename")
         if not args or ' ' not in args:
             yield event.plain_result(
                 "📝 **重命名源**\n\n"
@@ -519,7 +537,7 @@ rss pause all     # 暂停所有源
     @rss.command("pause")
     async def cmd_pause(self, event: AstrMessageEvent):
         """暂停源（支持批量）"""
-        args = event.message_str.strip()
+        args = self._get_command_args(event.message_str, "pause")
         if not args:
             yield event.plain_result("💡 格式：/pause <别名> 或 /pause all")
             return
@@ -557,7 +575,7 @@ rss pause all     # 暂停所有源
     @rss.command("resume")
     async def cmd_resume(self, event: AstrMessageEvent):
         """恢复源（支持批量）"""
-        args = event.message_str.strip()
+        args = self._get_command_args(event.message_str, "resume")
         if not args:
             yield event.plain_result("💡 格式：/resume <别名> 或 /resume all")
             return
@@ -591,7 +609,7 @@ rss pause all     # 暂停所有源
     @rss.command("test")
     async def cmd_test(self, event: AstrMessageEvent):
         """测试源"""
-        args = event.message_str.strip()
+        args = self._get_command_args(event.message_str, "test")
         if not args:
             yield event.plain_result("💡 格式：/test <别名>")
             return
@@ -616,7 +634,7 @@ rss pause all     # 暂停所有源
     @rss.command("get")
     async def cmd_get(self, event: AstrMessageEvent):
         """获取最新资讯（支持并发）"""
-        args = event.message_str.strip()
+        args = self._get_command_args(event.message_str, "get")
 
         if args:
             # 获取指定源
