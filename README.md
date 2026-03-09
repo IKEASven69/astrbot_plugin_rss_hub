@@ -30,31 +30,23 @@
 随时可以改名：/rename ai 橘鸦
 ```
 
-### 📊 与原版对比
+## 🚀 核心功能
 
-| 功能 | 原版 | RSS Hub |
-|------|------|----------|
-| 命令长度 | `/ainews`, `/rss_add_xxx` | ✅ `/get`, `/add` |
-| 别名系统 | ❌ 不支持 | ✅ 自定义 + 可改名 |
-| 源数量 | ❌ 单一源 | ✅ 多源管理 |
-| 推送时间 | ❌ 统一配置 | ✅ 每源独立 |
-| 并发获取 | ❌ 串行获取 | ✅ 3x 速度提升 |
-| 批量操作 | ❌ 不支持 | ✅ `/pause all`, `/resume all` |
-| 推荐源 | ❌ 手动添加 | ✅ 6+ 精选源 |
+### 多源管理
+- 支持无限数量的 RSS 源订阅
+- 每个源独立配置推送时间
+- 暂停/恢复单个源或所有源
 
-### 🚀 v2.1 新功能
-
-#### 1. 并发获取
-- 使用 `asyncio.gather()` 同时获取多个 RSS 源
+### 并发获取
 - **速度提升 3 倍**：5 个源从 15 秒降至 5 秒
 - 自动容错：单个源失败不影响其他源
 
-#### 2. 批量操作
+### 批量操作
 - `/pause all` - 暂停所有源
 - `/resume all` - 恢复所有源
 - `/get` - 无参数时获取所有活跃源的资讯
 
-#### 3. 推荐源列表
+### 推荐源列表
 ```
 /recs
 
@@ -64,14 +56,14 @@
 3. 橘鸦AI日报 (AI行业)
 4. 阮一峰科技周刊 (技术)
 5. solidot (开源/科技)
-6.机器之心 (AI/科技)
+6. 机器之心 (AI/科技)
 
 快速添加：/add 1
 ```
 
-#### 4. 交互式向导
+### 交互式向导
 - `/add <数字>` - 从推荐源快速添加
-- 自动预填充别名、URL、推送时间
+- 自动填充别名、URL、推送时间
 - 支持自定义覆盖
 
 ## 📝 快速上手
@@ -131,10 +123,25 @@
 
 ## 📦 安装
 
-1. 复制 `rss` 目录到 AstrBot 插件目录
-2. 安装依赖：`pip install aiohttp feedparser python-dateutil`
+### 方式一：手动安装
+
+1. 下载插件到 AstrBot 的 `plugins/` 目录
+2. 安装依赖：
+   ```bash
+   pip install aiohttp feedparser python-dateutil
+   ```
 3. 重启 AstrBot
 4. 测试：`/`
+
+### 方式二：从 GitHub 安装
+
+```bash
+cd AstrBot/plugins/
+git clone https://github.com/IKEASven69/astrbot_plugin_rss_hub.git
+cd astrbot_plugin_rss_hub
+pip install -r requirements.txt
+# 重启 AstrBot
+```
 
 ## 💡 别名命名建议
 
@@ -144,55 +151,6 @@
 | AI 类 | `ai`, `ml` |
 | 开发者 | `dev`, `code` |
 | 新闻类 | `news` |
-
-## 🔧 技术架构
-
-```python
-# 别名解析核心
-def _resolve_alias(self, alias: str) -> Optional[str]:
-    alias = alias.lower().strip()
-    return self._alias_map.get(alias)
-
-# 添加源时设置别名
-new_source = RSSourceConfig(
-    id=source_id,
-    alias=alias,  # 用户自定义
-    name=alias.capitalize(),
-    ...
-)
-
-# 并发获取核心（v2.1 新增）
-async def _fetch_articles_concurrent(
-    self, sources: List[Tuple[str, RSSourceConfig]]
-) -> List[Tuple[RSSourceConfig, Article]]:
-    """并发获取多个 RSS 源"""
-    tasks = [self._fetch_and_wrap(source_id, source) for source_id, source in sources]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-    return [r for r in results if isinstance(r, tuple)]
-
-# 批量操作核心（v2.1 新增）
-if args.lower() == "all":
-    for source_id, source in self._rss_sources.items():
-        if source.enabled:
-            source.enabled = False
-    await self._save_config()
-```
-
-### 推荐源数据结构（v2.1 新增）
-
-```python
-RECOMMENDED_SOURCES = [
-    {
-        "alias": "36kr",
-        "name": "36氪",
-        "url": "https://36kr.com/feed",
-        "push_hour": 9,
-        "push_minute": 0,
-        "enabled": True
-    },
-    # ... 6 个精选源
-]
-```
 
 ## 📄 License
 
