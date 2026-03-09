@@ -301,8 +301,19 @@ rss pause all     # 暂停所有源
     @rss.command("add")
     async def cmd_add(self, event: AstrMessageEvent):
         """添加 RSS 源（支持交互式向导）"""
-        # 使用命令组后，message_str 只包含参数部分
-        text = event.message_str.strip()
+        # 获取完整消息并处理
+        full_text = event.message_str.strip()
+        logger.info(f"[DEBUG] 完整消息: '{full_text}'")
+
+        # 使用命令组后，message_str 可能仍然包含 "add"，需要去掉
+        text = full_text
+        # 如果消息以 "add " 开头，去掉它（兼容性处理）
+        if text.startswith("add "):
+            text = text[4:].strip()
+        elif text == "add":
+            text = ""
+
+        logger.info(f"[DEBUG] 处理后参数: '{text}'")
 
         # 方式1：从推荐源添加
         if text.isdigit():
