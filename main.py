@@ -43,6 +43,13 @@ RECOMMENDED_SOURCES = [
         "description": "关注互联网创业"
     },
     {
+        "alias": "ai",
+        "name": "橘鸦AI日报",
+        "url": "https://imjuya.github.io/juya-ai-daily/rss",
+        "tags": ["AI", "科技"],
+        "description": "AI行业资讯日报"
+    },
+    {
         "alias": "sspai",
         "name": "少数派",
         "url": "https://sspai.com/feed",
