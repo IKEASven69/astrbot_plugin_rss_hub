@@ -1,0 +1,50 @@
+{
+	"default_push_hour": {
+		"type": "int",
+		"description": "默认推送时间（小时）",
+		"hint": "0-23，新RSS源的默认推送小时，默认为 8",
+		"default": 8
+	},
+	"default_push_minute": {
+		"type": "int",
+		"description": "默认推送时间（分钟）",
+		"hint": "0-59，新RSS源的默认推送分钟，默认为 0",
+		"default": 0
+	},
+	"rss_poll_interval": {
+		"type": "int",
+		"description": "RSS 轮询间隔（秒）",
+		"hint": "当 RSS 尚未更新当日内容时，每隔多少秒重新检查一次，默认 600 秒（10分钟）",
+		"default": 600
+	},
+	"max_summary_length": {
+		"type": "int",
+		"description": "AI 总结最大长度",
+		"hint": "AI 总结的最大字符数，默认 2000",
+		"default": 2000
+	},
+	"cache_ttl_days": {
+		"type": "int",
+		"description": "缓存保留天数",
+		"hint": "AI 总结缓存保留天数，默认 10 天",
+		"default": 10
+	},
+	"enable_ai_summary": {
+		"type": "bool",
+		"description": "启用 AI 总结",
+		"hint": "是否启用 AI 智能总结功能，默认启用",
+		"default": true
+	},
+	"subscribed_groups": {
+		"type": "text",
+		"description": "订阅推送的 QQ 群号（每行一个）",
+		"hint": "手动填写需要推送的 QQ 群号，每行一个",
+		"default": ""
+	},
+	"subscribed_users": {
+		"type": "text",
+		"description": "订阅推送的 QQ 号（私聊，每行一个）",
+		"hint": "手动填写需要私聊推送的 QQ 号，每行一个",
+		"default": ""
+	}
+}
