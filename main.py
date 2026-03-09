@@ -221,8 +221,13 @@ class RSSHubPlugin(Star):
     # ==================== 命令处理 ====================
 
     def _parse_command_args(self, message_str: str, command: str) -> str:
-        """解析命令参数，自动处理新旧命令格式"""
+        """解析命令参数，自动处理带/和不带/的格式"""
         text = message_str.strip()
+
+        # 去掉可能的前导斜杠
+        if text.startswith("/"):
+            text = text[1:].strip()
+
         # 尝试新格式 "rss <command>"
         new_prefix = f"rss {command} "
         if text.startswith(new_prefix):
@@ -238,6 +243,7 @@ class RSSHubPlugin(Star):
         return text[len(command):].strip()
 
     @filter.command("rss")
+    @filter.command("rss help")
     async def cmd_help(self, event: AstrMessageEvent):
         """显示帮助"""
         help_text = """
