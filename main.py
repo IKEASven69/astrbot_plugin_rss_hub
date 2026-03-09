@@ -310,10 +310,55 @@ rss pause all     # 暂停所有源
             if 0 <= idx < len(RECOMMENDED_SOURCES):
                 rec = RECOMMENDED_SOURCES[idx]
                 yield event.plain_result(f"🔄 正在添加 **{rec['name']}**...")
-                await self._add_source_from_rec(event, rec)
+
+                # 从推荐源添加（内联代码）
+                alias = rec['alias']
+
+                # 检查别名是否已存在
+                if alias in self._alias_map:
+                    yield event.plain_result(
+                        f"❌ 别名 `{alias}` 已存在\n"
+                        f"💡 使用不同的别名或先 /del {alias}"
+                    )
+                    return
+
+                # 测试源
+                test_result = await self._test_rss_source(rec['url'])
+                if not test_result:
+                    yield event.plain_result(f"❌ `{rec['name']}` 测试失败，请稍后再试")
+                    return
+
+                # 创建源
+                source_id = f"src_{int(datetime.now().timestamp())}"
+                new_source = RSSourceConfig(
+                    id=source_id,
+                    alias=alias,
+                    name=rec['name'],
+                    url=rec['url'],
+                    push_hour=self.config.get("default_push_hour", 8),
+                    push_minute=self.config.get("default_push_minute", 0),
+                    enabled=True,
+                    tags=rec['tags'],
+                    created_at=datetime.now().isoformat()
+                )
+
+                # 保存
+                self._rss_sources[source_id] = new_source
+                self._alias_map[alias] = source_id
+                await self._save_rss_sources()
+
+                # 启动调度器
+                await self._start_scheduler(source_id)
+
+                yield event.plain_result(
+                    f"✅ `{rec['name']}` 添加成功！\n"
+                    f"📡 别名：{alias}\n"
+                    f"🏷️ {', '.join(rec['tags'])}\n\n"
+                    f"💡 使用 /get {alias} 获取资讯"
+                )
                 return
 
-        # 方式2：直接添加 /add <别名> <URL> [时间]
+        # 方式2：直接添加
         if text and not text.startswith('rec') and not text.startswith('推荐'):
             parts = text.split()
             if len(parts) >= 2:
@@ -329,8 +374,48 @@ rss pause all     # 暂停所有源
                         push_minute = int(time_match.group(2))
 
                 yield event.plain_result(f"🔄 正在添加 `{alias}`...")
-                await self._add_source_direct(
-                    event, alias, url, push_hour, push_minute
+
+                # 直接添加源（内联代码）
+                if alias in self._alias_map:
+                    yield event.plain_result(
+                        f"❌ 别名 `{alias}` 已存在\n"
+                        f"💡 请换一个别名"
+                    )
+                    return
+
+                # 测试源
+                test_result = await self._test_rss_source(url)
+                if not test_result:
+                    yield event.plain_result(f"❌ RSS 源测试失败，请检查 URL")
+                    return
+
+                # 创建源
+                source_id = f"src_{int(datetime.now().timestamp())}"
+                new_source = RSSourceConfig(
+                    id=source_id,
+                    alias=alias,
+                    name=alias.capitalize(),
+                    url=url,
+                    push_hour=push_hour,
+                    push_minute=push_minute,
+                    enabled=True,
+                    tags=[],
+                    created_at=datetime.now().isoformat()
+                )
+
+                # 保存
+                self._rss_sources[source_id] = new_source
+                self._alias_map[alias] = source_id
+                await self._save_rss_sources()
+
+                # 启动调度器
+                await self._start_scheduler(source_id)
+
+                yield event.plain_result(
+                    f"✅ 源 `{alias}` 添加成功！\n"
+                    f"📡 URL：{url}\n"
+                    f"🕐 推送：{push_hour:02d}:{push_minute:02d}\n\n"
+                    f"💡 使用 /get {alias} 获取资讯"
                 )
                 return
 
@@ -338,107 +423,12 @@ rss pause all     # 暂停所有源
         yield event.plain_result(
             "📝 **添加 RSS 源**\n\n"
             "选择添加方式：\n"
-            "1. 输入 /add <序号> 从推荐源添加\n"
-            "   例：/add 1\n\n"
-            "2. 输入 /add <别名> <URL> 直接添加\n"
-            "   例：/add myblog https://example.com/feed\n\n"
-            "3. 输入 /recs 查看所有推荐源\n\n"
+            "1. 输入 /rss add <序号> 从推荐源添加\n"
+            "   例：/rss add 1\n\n"
+            "2. 输入 /rss add <别名> <URL> 直接添加\n"
+            "   例：/rss add myblog https://example.com/feed\n\n"
+            "3. 输入 /rss recs 查看所有推荐源\n\n"
             "💡 推荐源包括：36氪、少数派、TechCrunch、阮一峰、InfoQ 等"
-        )
-
-    async def _add_source_from_rec(self, event: AstrMessageEvent, rec: Dict):
-        """从推荐源添加"""
-        alias = rec['alias']
-
-        # 检查别名是否已存在
-        if alias in self._alias_map:
-            yield event.plain_result(
-                f"❌ 别名 `{alias}` 已存在\n"
-                f"💡 使用不同的别名或先 /del {alias}"
-            )
-            return
-
-        # 测试源
-        test_result = await self._test_rss_source(rec['url'])
-        if not test_result:
-            yield event.plain_result(f"❌ `{rec['name']}` 测试失败，请稍后再试")
-            return
-
-        # 创建源
-        source_id = f"src_{int(datetime.now().timestamp())}"
-        new_source = RSSourceConfig(
-            id=source_id,
-            alias=alias,
-            name=rec['name'],
-            url=rec['url'],
-            push_hour=self.config.get("default_push_hour", 8),
-            push_minute=self.config.get("default_push_minute", 0),
-            enabled=True,
-            tags=rec['tags'],
-            created_at=datetime.now().isoformat()
-        )
-
-        # 保存
-        self._rss_sources[source_id] = new_source
-        self._alias_map[alias] = source_id
-        await self._save_rss_sources()
-
-        # 启动调度器
-        await self._start_scheduler(source_id)
-
-        yield event.plain_result(
-            f"✅ `{rec['name']}` 添加成功！\n"
-            f"📡 别名：{alias}\n"
-            f"🏷️ {', '.join(rec['tags'])}\n\n"
-            f"💡 使用 /get {alias} 获取资讯"
-        )
-
-    async def _add_source_direct(
-        self, event: AstrMessageEvent,
-        alias: str, url: str,
-        push_hour: int, push_minute: int
-    ):
-        """直接添加源"""
-        if alias in self._alias_map:
-            yield event.plain_result(
-                f"❌ 别名 `{alias}` 已存在\n"
-                f"💡 请换一个别名"
-            )
-            return
-
-        # 测试源
-        test_result = await self._test_rss_source(url)
-        if not test_result:
-            yield event.plain_result(f"❌ RSS 源测试失败，请检查 URL")
-            return
-
-        # 创建源
-        source_id = f"src_{int(datetime.now().timestamp())}"
-        new_source = RSSourceConfig(
-            id=source_id,
-            alias=alias,
-            name=alias.capitalize(),
-            url=url,
-            push_hour=push_hour,
-            push_minute=push_minute,
-            enabled=True,
-            tags=[],
-            created_at=datetime.now().isoformat()
-        )
-
-        # 保存
-        self._rss_sources[source_id] = new_source
-        self._alias_map[alias] = source_id
-        await self._save_rss_sources()
-
-        # 启动调度器
-        await self._start_scheduler(source_id)
-
-        yield event.plain_result(
-            f"✅ 源 `{alias}` 添加成功！\n"
-            f"📡 URL：{url}\n"
-            f"🕐 推送：{push_hour:02d}:{push_minute:02d}\n\n"
-            f"💡 使用 /get {alias} 获取资讯"
         )
 
     @rss.command("del")
