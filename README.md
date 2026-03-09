@@ -123,25 +123,15 @@
 
 ## 📦 安装
 
-### 方式一：手动安装
+在 AstrBot 插件市场搜索 **rss_hub**，点击安装即可。
 
-1. 下载插件到 AstrBot 的 `plugins/` 目录
-2. 安装依赖：
-   ```bash
-   pip install aiohttp feedparser python-dateutil
-   ```
-3. 重启 AstrBot
-4. 测试：`/`
+或手动填入仓库地址安装：
 
-### 方式二：从 GitHub 安装
-
-```bash
-cd AstrBot/plugins/
-git clone https://github.com/IKEASven69/astrbot_plugin_rss_hub.git
-cd astrbot_plugin_rss_hub
-pip install -r requirements.txt
-# 重启 AstrBot
 ```
+https://github.com/IKEASven69/astrbot_plugin_rss_hub
+```
+
+**依赖（`aiohttp`、`feedparser`、`python-dateutil`）会由 AstrBot 自动安装。**
 
 ## 💡 别名命名建议
 
