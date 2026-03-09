@@ -123,24 +123,9 @@
 
 ## 📦 安装
 
-### 方式一：通过插件市场安装（推荐）
-
-在 AstrBot 插件市场搜索 **rss_hub**，点击安装即可。
-
-或手动填入仓库地址安装：
-
-```
-https://github.com/IKEASven69/astrbot_plugin_rss_hub
-```
-
-**依赖（`aiohttp`、`feedparser`、`python-dateutil`）会由 AstrBot 自动安装。**
-
-### 方式二：手动安装
-
-1. 将插件复制到 AstrBot 的 `plugins/` 目录
-2. 重启 AstrBot
-
-**注意**：AstrBot 会自动检测并安装 `requirements.txt` 中的依赖，无需手动运行 pip install。
+1. 确保已安装 AstrBot
+2. 将插件复制到 AstrBot 的 `plugins/` 目录（也可以使用 AstrBot 插件管理器安装，或填入仓库地址：`https://github.com/IKEASven69/astrbot_plugin_rss_hub`）
+3. 重启 AstrBot 或使用热加载命令
 
 ## 💡 别名命名建议
 
