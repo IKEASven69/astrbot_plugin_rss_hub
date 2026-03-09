@@ -1,6 +1,6 @@
 name: astrbot_plugin_rss_hub
-display_name: RSS Hub - 极简命令+推荐源
+display_name: RSS Hub - 多源资讯订阅
 desc: 支持多RSS源订阅、AI智能总结、定时推送、并发获取的强大资讯聚合插件
-version: v2.1.0
-author: optimized
-repo: https://github.com/yourusername/astrbot_plugin_rss_hub
+version: v2.2.0
+author: Yuuki诚
+repo: https://github.com/IKEASven69/astrbot_plugin_rss_hub

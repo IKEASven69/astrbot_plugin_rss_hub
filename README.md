@@ -1,33 +1,33 @@
-# RSS Hub - 极简命令版多源资讯订阅插件
+# RSS Hub - 多源资讯订阅插件
 
-🚀 **极简命令 + 自定义别名 + 并发获取 + 推荐源** - 为 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 开发
+🚀 **多源管理 + 自定义别名 + 并发获取 + 推荐源** - 为 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 开发
 
 ## ✨ 核心特性
 
-### 🎯 极简命令（所有命令超短）
+### 🎯 命令列表（所有命令使用 rss 前缀）
 
 | 命令 | 说明 | 示例 |
 |------|------|------|
-| `/` | 帮助 | `/` |
-| `/list` | 查看所有源 | `/list` |
-| `/add <别名/数字> <URL>` | 添加源 | `/add 36kr https://36kr.com/feed` |
-| `/get [别名]` | 获取资讯 | `/get ai` |
-| `/del <别名>` | 删除源 | `/del 36kr` |
-| `/rename <旧> <新>` | 改名 | `/rename ai 橘鸦` |
-| `/pause <别名/all>` | 暂停 | `/pause 36kr` / `/pause all` |
-| `/resume <别名/all>` | 恢复 | `/resume 36kr` / `/resume all` |
-| `/test <别名>` | 测试 | `/test ai` |
-| `/recs` | 推荐源 | `/recs` |
-| `/sub` | 订阅 | `/sub` |
-| `/unsub` | 取消 | `/unsub` |
-| `/status` | 状态 | `/status` |
+| `rss` | 帮助 | `rss` |
+| `rss list` | 查看所有源 | `rss list` |
+| `rss add <别名/数字> <URL>` | 添加源 | `rss add 36kr https://36kr.com/feed` |
+| `rss get [别名]` | 获取资讯 | `rss get ai` |
+| `rss del <别名>` | 删除源 | `rss del 36kr` |
+| `rss rename <旧> <新>` | 改名 | `rss rename ai 橘鸦` |
+| `rss pause <别名/all>` | 暂停 | `rss pause 36kr` / `rss pause all` |
+| `rss resume <别名/all>` | 恢复 | `rss resume 36kr` / `rss resume all` |
+| `rss test <别名>` | 测试 | `rss test ai` |
+| `rss recs` | 推荐源 | `rss recs` |
+| `rss sub` | 订阅 | `rss sub` |
+| `rss unsub` | 取消 | `rss unsub` |
+| `rss status` | 状态 | `rss status` |
 
 ### 🏷️ 自定义别名系统
 
 ```
-添加源时自定义：/add ai https://example.com/feed
-后续用别名操作：/get ai, /pause ai, /del ai
-随时可以改名：/rename ai 橘鸦
+添加源时自定义：rss add ai https://example.com/feed
+后续用别名操作：rss get ai, rss pause ai, rss del ai
+随时可以改名：rss rename ai 橘鸦
 ```
 
 ## 🚀 核心功能
@@ -42,13 +42,13 @@
 - 自动容错：单个源失败不影响其他源
 
 ### 批量操作
-- `/pause all` - 暂停所有源
-- `/resume all` - 恢复所有源
-- `/get` - 无参数时获取所有活跃源的资讯
+- `rss pause all` - 暂停所有源
+- `rss resume all` - 恢复所有源
+- `rss get` - 无参数时获取所有活跃源的资讯
 
 ### 推荐源列表
 ```
-/recs
+rss recs
 
 显示 6 个精选 RSS 源：
 1. 36氪 (科技资讯)
@@ -58,11 +58,11 @@
 5. solidot (开源/科技)
 6. 机器之心 (AI/科技)
 
-快速添加：/add 1
+快速添加：rss add 1
 ```
 
 ### 交互式向导
-- `/add <数字>` - 从推荐源快速添加
+- `rss add <数字>` - 从推荐源快速添加
 - 自动填充别名、URL、推送时间
 - 支持自定义覆盖
 
@@ -70,36 +70,36 @@
 
 ```
 # 1. 查看推荐源（最快上手方式）
-/recs
+rss recs
 
 # 2. 快速添加推荐源（用数字）
-/add 1    # 添加 36氪
-/add 2    # 添加少数派
+rss add 1    # 添加 36氪
+rss add 2    # 添加少数派
 
 # 3. 查看所有源
-/list
+rss list
 
 # 4. 获取资讯
-/get 36kr         # 获取 36氪
-/get              # 获取所有活跃源
+rss get 36kr         # 获取 36氪
+rss get              # 获取所有活跃源
 
 # 5. 批量暂停/恢复
-/pause all        # 暂停所有源
-/resume 36kr      # 恢复单个源
-/resume all       # 恢复所有源
+rss pause all        # 暂停所有源
+rss resume 36kr      # 恢复单个源
+rss resume all       # 恢复所有源
 
 # 6. 手动添加自定义源
-/add myblog https://example.com/feed
-/add sspai https://sspai.com/feed 9:00
+rss add myblog https://example.com/feed
+rss add sspai https://sspai.com/feed 9:00
 
 # 7. 测试源
-/test 36kr
+rss test 36kr
 
 # 8. 改名
-/rename 36kr 科技
+rss rename 36kr 科技
 
 # 9. 删除源
-/del myblog
+rss del myblog
 ```
 
 ## ⚙️ 配置
