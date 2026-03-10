@@ -313,7 +313,7 @@ rss pause all     # 暂停所有源
             )
 
         lines.append(f"\n💡 共 {len(self._rss_sources)} 个源")
-        lines.append("💡 使用 /get <别名> 获取资讯")
+        lines.append("💡 使用 /rss get <别名> 获取资讯")
         yield event.plain_result("\n".join(lines))
 
     @rss.command("recs")
@@ -354,7 +354,7 @@ rss pause all     # 暂停所有源
                 if alias in self._alias_map:
                     yield event.plain_result(
                         f"❌ 别名 `{alias}` 已存在\n"
-                        f"💡 使用不同的别名或先 /del {alias}"
+                        f"💡 使用不同的别名或先 /rss del {alias}"
                     )
                     return
 
@@ -390,7 +390,7 @@ rss pause all     # 暂停所有源
                     f"✅ `{rec['name']}` 添加成功！\n"
                     f"📡 别名：{alias}\n"
                     f"🏷️ {', '.join(rec['tags'])}\n\n"
-                    f"💡 使用 /get {alias} 获取资讯"
+                    f"💡 使用 /rss get {alias} 获取资讯"
                 )
                 return
 
@@ -451,7 +451,7 @@ rss pause all     # 暂停所有源
                     f"✅ 源 `{alias}` 添加成功！\n"
                     f"📡 URL：{url}\n"
                     f"🕐 推送：{push_hour:02d}:{push_minute:02d}\n\n"
-                    f"💡 使用 /get {alias} 获取资讯"
+                    f"💡 使用 /rss get {alias} 获取资讯"
                 )
                 return
 
@@ -472,7 +472,7 @@ rss pause all     # 暂停所有源
         """删除 RSS 源（支持批量）"""
         args = self._get_command_args(event.message_str, "del")
         if not args:
-            yield event.plain_result("💡 格式：/del <别名> 或 /del all")
+            yield event.plain_result("💡 格式：/rss del <别名> 或 /rss del all")
             return
 
         # 批量删除
@@ -546,7 +546,7 @@ rss pause all     # 暂停所有源
         """暂停源（支持批量）"""
         args = self._get_command_args(event.message_str, "pause")
         if not args:
-            yield event.plain_result("💡 格式：/pause <别名> 或 /pause all")
+            yield event.plain_result("💡 格式：/rss pause <别名> 或 /rss pause all")
             return
 
         # 批量暂停
@@ -584,7 +584,7 @@ rss pause all     # 暂停所有源
         """恢复源（支持批量）"""
         args = self._get_command_args(event.message_str, "resume")
         if not args:
-            yield event.plain_result("💡 格式：/resume <别名> 或 /resume all")
+            yield event.plain_result("💡 格式：/rss resume <别名> 或 /rss resume all")
             return
 
         # 批量恢复
@@ -618,7 +618,7 @@ rss pause all     # 暂停所有源
         """测试源"""
         args = self._get_command_args(event.message_str, "test")
         if not args:
-            yield event.plain_result("💡 格式：/test <别名>")
+            yield event.plain_result("💡 格式：/rss test <别名>")
             return
 
         source_id = self._resolve_alias(args)
