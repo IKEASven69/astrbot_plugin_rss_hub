@@ -282,6 +282,7 @@ rss rename <旧> <新>  - 改名
 rss pause <别名|all>  - 暂停
 rss resume <别名|all> - 恢复
 rss test <别名>   - 测试源
+rss time <别名> <时间> - 修改推送时间
 
 **订阅：**
 rss sub          - 订阅
@@ -723,6 +724,67 @@ rss pause all     # 暂停所有源
         self._cmd_subscriptions.discard(umo)
         await self._save_subscriptions()
         yield event.plain_result("✅ 已取消订阅")
+
+    @rss.command("time")
+    async def cmd_time(self, event: AstrMessageEvent):
+        """修改推送时间"""
+        args = self._get_command_args(event.message_str, "time")
+
+        if not args:
+            yield event.plain_result("💡 格式：/rss time <别名> <时间>\n   例：/rss time ai 9:00")
+            return
+
+        parts = args.split()
+        if len(parts) < 2:
+            yield event.plain_result("💡 格式：/rss time <别名> <时间>\n   例：/rss time ai 9:00")
+            return
+
+        alias = parts[0].lower()
+        time_str = parts[1]
+
+        # 解析时间
+        time_match = re.match(r"(\d{1,2}):(\d{2})", time_str)
+        if not time_match:
+            yield event.plain_result("❌ 时间格式错误，应为 HH:MM\n   例：9:00 或 09:00")
+            return
+
+        hour = int(time_match.group(1))
+        minute = int(time_match.group(2))
+
+        if hour < 0 or hour > 23 or minute < 0 or minute > 59:
+            yield event.plain_result("❌ 时间范围错误\n   小时：0-23，分钟：0-59")
+            return
+
+        # 查找源
+        source_id = self._resolve_alias(alias)
+        if not source_id:
+            yield event.plain_result(f"❌ 找不到别名 `{alias}`")
+            return
+
+        source = self._rss_sources[source_id]
+
+        # 更新时间
+        old_time = f"{source.push_hour:02d}:{source.push_minute:02d}"
+        source.push_hour = hour
+        source.push_minute = minute
+
+        # 保存配置
+        await self._save_rss_sources()
+
+        # 重启调度器
+        if source_id in self._scheduler_tasks:
+            self._scheduler_tasks[source_id].cancel()
+            del self._scheduler_tasks[source_id]
+
+        await self._start_scheduler(source_id)
+
+        new_time = f"{hour:02d}:{minute:02d}"
+        yield event.plain_result(
+            f"✅ **{source.name}** 推送时间已更新\n"
+            f"📡 别名：{alias}\n"
+            f"🕐 {old_time} → {new_time}\n\n"
+            f"💡 将在每天 {new_time} 自动推送"
+        )
 
     @rss.command("status")
     async def cmd_status(self, event: AstrMessageEvent):
