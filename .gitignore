@@ -49,3 +49,9 @@ htmlcov/
 
 # Build
 *.bak
+
+# Planning (GSD)
+.planning/
+.continue-here.md
+TODO.md
+HANDOFF.md
